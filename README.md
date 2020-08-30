@@ -13,6 +13,6 @@ adb shell /data/local/tmp/clipboardcli.sh
 adb shell /data/local/tmp/clipboardcli.sh <需要设置的剪贴板内容>
 ## 高级应用
 1、手机运行atx-agent代理程序，通过curl和atx-agent通信，让atx-agent代为执行clipboardcli，则其它程序可以间接获取或设置手机剪贴板。  
-2、在电脑上自定义powershell函数，一个命令即可是手机和电脑剪贴板同步。  
+2、在电脑上自定义powershell函数，一个命令即使手机和电脑剪贴板同步。  
 ## 感谢
 感谢![Scrcpy](https://github.com/Genymobile/scrcpy)项目，给我灵感。Scrcpy是一个低延迟高效率的Android投屏软件，非常棒的一个项目。
