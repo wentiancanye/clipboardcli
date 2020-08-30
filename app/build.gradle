@@ -1,0 +1,88 @@
+apply plugin: 'com.android.application'
+
+def code = 0
+def name = ""
+
+def checkRelease() {
+    def runTasks = gradle.startParameter.taskNames
+    for (String task : runTasks) {
+        // 执行“assemble”并且非“debug”的任务就是执行“release”的任务
+        if (task.contains("Release")) {
+            // targetTask = task
+            return true
+        }
+    }
+    return false
+}
+
+def versionPropsFile = file('../version.properties')
+if (versionPropsFile.canRead()) {
+    Properties versionProps = new Properties()
+    versionProps.load(new FileInputStream(versionPropsFile))
+    def main = versionProps['VERSION_MAIN'].toInteger()
+    def build = versionProps['VERSION_BUILD'].toInteger()
+    code = versionProps['VERSION_CODE'].toInteger()
+    if (checkRelease()) {
+        println "Building assembleRelease."
+        build = build + 1
+        code = code + 1
+        versionProps['VERSION_BUILD'] = build.toString()
+        versionProps['VERSION_CODE'] = code.toString()
+        versionProps.store(versionPropsFile.newWriter(), null)
+    } else {
+        println "Building other."
+        code = code + 1
+        versionProps['VERSION_CODE'] = code.toString()
+        versionProps.store(versionPropsFile.newWriter(), null)
+    }
+    name = main.toString() + "." + build.toString() + "." + code.toString()
+} else {
+    throw new GradleException("Could not find version.properties!")
+}
+
+println 'Starting build.'
+println 'versionCode: ' + code.toString()
+println 'versionName: ' + name.toString()
+
+android {
+    compileSdkVersion 30
+    buildToolsVersion "30.0.2"
+
+    defaultConfig {
+        applicationId "com.canye.clipboardcli"
+        minSdkVersion 29
+        targetSdkVersion 30
+        versionCode code
+        versionName name
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        applicationVariants.all { variant ->
+            variant.outputs.all { output ->
+                if (variant.buildType.name == 'release') {
+                    def fileName ="clipboardcli-" + name + "-release.apk"
+                    outputFileName = fileName
+                }
+                if (variant.buildType.name == 'debug') {
+                    def fileName ="clipboardcli-" + name + "-debug.apk"
+                    outputFileName = fileName
+                }
+            }
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+
+}
